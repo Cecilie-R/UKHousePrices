@@ -62,8 +62,42 @@ server <- function(input, output) {
     
     Dates<-format(input$Dates, "%Y-%m")
     
+
+    
     
     datamap1<-readRDS(paste(Dates, ".Rds", sep=""))
+    
+    if(input$Type=="T"){
+      datamap1<-subset(datamap1, type=="T")
+    } else if (input$Type=="D"){
+      datamap1<-subset(datamap1, type=="D")
+    } else if(input$Type=="F"){
+      datamap1<-subset(datamap1, type=="F")
+    } else if(input$Type=="S"){
+      datamap1<-subset(datamap1, type=="S")
+    } else if(input$Type=="O"){
+      datamap1<-subset(datamap1, type=="O")
+    } else if(input$Type=="A"){
+      datamap1<-datamap1
+    }
+    
+    if(input$OldNew=="y"){
+      datamap1<-subset(datamap1, newbuild=="Y")
+    } else if (input$OldNew=="M"){
+      datamap1<-subset(datamap1, newbuild=="N")
+    } else if(input$OldNew=="N"){
+      datamap1<-Datamap
+    }
+    
+    if(input$Duration=="L"){
+      datamap1<-subset(datamap1, duration=="L")
+    } else if (input$Duration=="F"){
+      datamap1<-subset(datamap1, duration=="F")
+    } else if(input$Duration=="A"){
+      datamap1<-Datamap
+    }
+    
+    
     datamap1$price<-datamap1$price/1000
     # load example data (Fiji Earthquakes) + keep only 100 first lines
     #data(quakes)
