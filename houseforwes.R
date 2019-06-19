@@ -58,14 +58,23 @@ ui <- dashboardPage(
 )))
 
 server <- function(input, output) {
-  output$map <- renderLeaflet({
-    
-    Dates<-format(input$Dates, "%Y-%m")
-    
+  
+  output$map<-renderLeaflet({
+    leaflet(options = leafletOptions(preferCanvas = TRUE)) %>%
+  addTiles()  %>% 
+  setView(lat=52.1386394, lng=-0.4667782 , zoom=8)
+  })
+  
+
 
     
     
-    datamap1<-readRDS(paste(Dates, ".Rds", sep=""))
+    
+    
+    datamap1<-reactive({
+      Dates<-format(input$Dates, "%Y-%m")
+      
+      readRDS(paste(Dates, ".Rds", sep=""))
     
     if(input$Type=="T"){
       datamap1<-subset(datamap1, type=="T")
@@ -86,7 +95,7 @@ server <- function(input, output) {
     } else if (input$OldNew=="M"){
       datamap1<-subset(datamap1, newbuild=="N")
     } else if(input$OldNew=="N"){
-      datamap1<-Datamap
+      datamap1<-datamap1
     }
     
     if(input$Duration=="L"){
@@ -94,40 +103,32 @@ server <- function(input, output) {
     } else if (input$Duration=="F"){
       datamap1<-subset(datamap1, duration=="F")
     } else if(input$Duration=="A"){
-      datamap1<-Datamap
+      datamap1<-datamap1
     }
     
     
     datamap1$price<-datamap1$price/1000
-    # load example data (Fiji Earthquakes) + keep only 100 first lines
-    #data(quakes)
-    #quakes =  head(quakes, 100)
-    
+    })
+
+    observe({
     # Create a color palette with handmade bins.
-    mybins=seq(min(datamap1$price), max(datamap1$price), by=10000)
+    mybins=seq(min(datamap1()$price), max(datamap1()$price), by=10000)
     mybins<-c(0,150,300,450,600,750,900,1050,1200)
-    mypalette = colorBin( palette="YlOrRd", domain=datamap1$price, na.color="transparent", bins=mybins)
+    mypalette = colorBin( palette="YlOrRd", domain=datamap1()$price, na.color="transparent", bins=mybins)
     
     # Prepar the text for the tooltip:
-    mytext=paste("price: ", datamap1$price) %>%
+    mytext=paste("price: ", datamap1()$price) %>%
       lapply(htmltools::HTML)
     
-    # Final Map
-    leaflet(datamap1,
-          #  clusterOptions = markerClusterOptions(),
-            options = leafletOptions(preferCanvas = TRUE)) %>% 
-      addTiles()  %>% 
-      setView( lat=52.1386394, lng=-0.4667782 , zoom=8) %>%
-      #  addProviderTiles("Esri.WorldImagery") %>% #Esri.WorldGrayCanvas
+    leafletProxy("map", data = datamap1()) %>%
       addCircles(~long, ~lat, 
                  color = ~mypalette(price), radius=13, fillOpacity = 0.2, stroke=T,
                  label = mytext,
                  labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"), textsize = "13px", direction = "auto")
       ) %>%
       addLegend( pal=mypalette, values=~price, opacity=0.9, title = "Magnitude", position = "bottomright" )
-    
-    
   })
+
 }
 
 shinyApp(ui, server)
