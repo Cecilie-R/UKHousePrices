@@ -14,6 +14,8 @@ The price paid data was downloaded from: [GOV.UK](https://www.gov.uk/government/
 The UK postcodes spatial data was downloaded from [HERE](#https://www.freemaptools.com/download-uk-postcode-lat-lng.htm) as a .csv file containing the longitude and lattitude of every listed postcode in the UK (approximately 1 GB).
 
 
+
+
 ## Format
 The price paid data file is a .csv file that is too large (~3.7 GB) to open in excel, R or notepad. Further, there was some trouble with the data in that some of the fields for address contained commas ',' which confused the access to the file in the format of .csv. I was not able to solve this problem so my solution was to extract only the columns prior to the address columns using AWK in the command line. The dataset in its raw format contained no column names, so these were added. Command line AWK code is given below. 
 
