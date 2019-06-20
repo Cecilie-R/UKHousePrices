@@ -38,11 +38,7 @@ ui <- dashboardPage(
         column(3,
         radioButtons("Duration", "Ownership Duration", c("Freehold" = "F",
                                                     "Leasehold" = "L",
-                                                    "Any" = "A"))),
-        column(3,
-        radioButtons("SalesType", "Sales Type", c("Private Recidency" = "A",
-                                                         "Non-Private (e.g. Buy to let)" = "B",
-                                                         "Any" = "A")))),
+                                                    "Any" = "A")))),
         
         
         
