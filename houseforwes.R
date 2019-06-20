@@ -74,7 +74,7 @@ server <- function(input, output) {
     datamap1<-reactive({
       Dates<-format(input$Dates, "%Y-%m")
       
-      readRDS(paste(Dates, ".Rds", sep=""))
+      datamap1<-readRDS(paste(Dates, ".Rds", sep=""))
     
     if(input$Type=="T"){
       datamap1<-subset(datamap1, type=="T")
@@ -108,12 +108,13 @@ server <- function(input, output) {
     
     
     datamap1$price<-datamap1$price/1000
+    datamap1
     })
 
     observe({
     # Create a color palette with handmade bins.
     mybins=seq(min(datamap1()$price), max(datamap1()$price), by=10000)
-    mybins<-c(0,150,300,450,600,750,900,1050,1200)
+    mybins<-c(0,150,300,450,600,750,900,1050,Inf)
     mypalette = colorBin( palette="YlOrRd", domain=datamap1()$price, na.color="transparent", bins=mybins)
     
     # Prepar the text for the tooltip:
@@ -121,14 +122,16 @@ server <- function(input, output) {
       lapply(htmltools::HTML)
     
     leafletProxy("map", data = datamap1()) %>%
+      clearShapes() %>%
       addCircles(~long, ~lat, 
-                 color = ~mypalette(price), radius=13, fillOpacity = 0.2, stroke=T,
+                 color = ~mypalette(price), radius=5, fillOpacity = 0.2, stroke=T,
                  label = mytext,
-                 labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"), textsize = "13px", direction = "auto")
-      ) %>%
-      addLegend( pal=mypalette, values=~price, opacity=0.9, title = "Magnitude", position = "bottomright" )
-  })
-
+                 labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"), textsize = "13px", direction = "auto")) %>%
+                   clearControls() %>% 
+                   addLegend( pal=mypalette, values=~price, opacity=0.9, title = "prices", position = "bottomright" )
+                 
+        })
+    
 }
 
 shinyApp(ui, server)
