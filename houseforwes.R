@@ -38,15 +38,11 @@ ui <- dashboardPage(
         column(3,
         radioButtons("Duration", "Ownership Duration", c("Freehold" = "F",
                                                     "Leasehold" = "L",
-<<<<<<< HEAD
-                                                    "Any" = "A")))),
-=======
                                                     "Any" = "A"))),
         column(3,
         radioButtons("SalesType", "Sales Type", c("Private Recidency" = "A",
                                                          "Non-Private (e.g. Buy to let)" = "B",
                                                          "Any" = "A")))),
->>>>>>> master
         
         
         
@@ -62,82 +58,6 @@ ui <- dashboardPage(
 )))
 
 server <- function(input, output) {
-<<<<<<< HEAD
-  
-  output$map<-renderLeaflet({
-    leaflet(options = leafletOptions(preferCanvas = TRUE)) %>%
-  addTiles()  %>% 
-  setView(lat=52.1386394, lng=-0.4667782 , zoom=8)
-  })
-  
-
-
-    
-    
-    
-    
-    datamap1<-reactive({
-      Dates<-format(input$Dates, "%Y-%m")
-      
-      datamap1<-readRDS(paste(Dates, ".Rds", sep=""))
-    
-    if(input$Type=="T"){
-      datamap1<-subset(datamap1, type=="T")
-    } else if (input$Type=="D"){
-      datamap1<-subset(datamap1, type=="D")
-    } else if(input$Type=="F"){
-      datamap1<-subset(datamap1, type=="F")
-    } else if(input$Type=="S"){
-      datamap1<-subset(datamap1, type=="S")
-    } else if(input$Type=="O"){
-      datamap1<-subset(datamap1, type=="O")
-    } else if(input$Type=="A"){
-      datamap1<-datamap1
-    }
-    
-    if(input$OldNew=="y"){
-      datamap1<-subset(datamap1, newbuild=="Y")
-    } else if (input$OldNew=="M"){
-      datamap1<-subset(datamap1, newbuild=="N")
-    } else if(input$OldNew=="N"){
-      datamap1<-datamap1
-    }
-    
-    if(input$Duration=="L"){
-      datamap1<-subset(datamap1, duration=="L")
-    } else if (input$Duration=="F"){
-      datamap1<-subset(datamap1, duration=="F")
-    } else if(input$Duration=="A"){
-      datamap1<-datamap1
-    }
-    
-    
-    datamap1$price<-datamap1$price/1000
-    datamap1
-    })
-
-    observe({
-    # Create a color palette with handmade bins.
-    mybins=seq(min(datamap1()$price), max(datamap1()$price), by=10000)
-    mybins<-c(0,150,300,450,600,750,900,1050,Inf)
-    mypalette = colorBin( palette="YlOrRd", domain=datamap1()$price, na.color="transparent", bins=mybins)
-    
-    # Prepar the text for the tooltip:
-    mytext=paste("price: ", datamap1()$price) %>%
-      lapply(htmltools::HTML)
-    
-    leafletProxy("map", data = datamap1()) %>%
-      clearShapes() %>%
-      addCircles(~long, ~lat, 
-                 color = ~mypalette(price), radius=5, fillOpacity = 0.2, stroke=T,
-                 label = mytext,
-                 labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"), textsize = "13px", direction = "auto")) %>%
-                   clearControls() %>% 
-                   addLegend( pal=mypalette, values=~price, opacity=0.9, title = "prices", position = "bottomright" )
-                 
-        })
-    
-=======
   output$map <- renderLeaflet({
     
     Dates<-format(input$Dates, "%Y-%m")
@@ -151,7 +71,7 @@ server <- function(input, output) {
     
     # Create a color palette with handmade bins.
     mybins=seq(min(datamap1$price), max(datamap1$price), by=10000)
-    mybins<-c(0,150,300,450,600,750,900,1050,Inf)
+    mybins<-c(0,150,300,450,600,750,900,1050,1200)
     mypalette = colorBin( palette="YlOrRd", domain=datamap1$price, na.color="transparent", bins=mybins)
     
     # Prepar the text for the tooltip:
@@ -174,7 +94,6 @@ server <- function(input, output) {
     
     
   })
->>>>>>> master
 }
 
 shinyApp(ui, server)
