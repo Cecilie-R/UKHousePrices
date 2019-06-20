@@ -7,21 +7,28 @@ output:
 This file describes the workflow for getting, cleaning and formatting the data. At the start of the script you should have only this script and two data files: the "pp-complete.csv" (price paid data) and the "ukpostcodes" (longitudes and latitudes). When the script has run these files will have been merged into 288 .Rds files for easy loading into the shiny application. 
 
 
+#test
 ## Downloads
 The price paid data was downloaded from: [GOV.UK](https://www.gov.uk/government/statistical-data-sets/price-paid-data-downloads#current-month-april-2019-data) as a complete dataset with continous monthly records from 1995-current. 
 
 The UK postcodes spatial data was downloaded from [HERE](#https://www.freemaptools.com/download-uk-postcode-lat-lng.htm) as a .csv file containing the longitude and lattitude of every listed postcode in the UK (approximately 1 GB).
 
+```{r}
+library(readr)
+big_mac_full_index <- read_csv("~/HouseProject/big-mac-data/output-data/big-mac-full-index.csv", 
+    col_types = cols(date = col_datetime(format = "%Y-%m-%d")))
+
+bigmacUK<-subset(big_mac_full_index, iso_a3=="GBR")
+```
 
 ## Format
 The price paid data file is a .csv file that is too large (~3.7 GB) to open in excel, R or notepad. Further, there was some trouble with the data in that some of the fields for address contained commas ',' which confused the access to the file in the format of .csv. I was not able to solve this problem so my solution was to extract only the columns prior to the address columns using AWK in the command line. The dataset in its raw format contained no column names, so these were added. Command line AWK code is given below. 
 
 ```{bash}
-awk -F ',' '{gsub(/"/,""); print $2 "," $3 "," $4 "," $5 "," $6 "," $7 }' pp-complete.csv |sed '1i price, date, code, type, oldnew, duration'
-> outputfile.csv
+#I cannot seem to run this bit directly from R so I use bash
+awk -F ',' '{gsub(/"/,""); print $2 "," $3 "," $4 "," $5 "," $6 "," $7 }' pp-complete.csv |sed '1i price, date, code, type, oldnew, duration' > outputfile.csv
 
 ```
-
 
 
 ## Function: split by month & merge with coordinates.
@@ -30,7 +37,7 @@ The function has two objectives: 1 use SQL to extract yearly subsets of the data
 2. merge the data with the longitude and lattitude data that we need later for mapping.
 
 ```{r}
-
+library(sqldf)
 #load spatial data
 postcodes<-read.csv("ukpostcodes.csv")
 postcodes$postcode<-as.character(postcodes$postcode)
@@ -63,6 +70,7 @@ HouseList<-split(datamap1, format(datamap1$date, "%Y-%m"))
 #save(HouseList, file=paste("House", year, ".Rdata", sep=""))
 for(i in names(HouseList)){
   write.csv(HouseList[[i]], paste0(i,".csv"), quote = FALSE, row.names = FALSE)
+
 }
 }
 
@@ -71,7 +79,6 @@ years<-c(1995:2019, 1)
 
 #use lapply to loop through the list and apply the function
 lapply(years, prepare)
-rm(postcodes, prepare, years)
 ```
 
 
@@ -81,23 +88,24 @@ The folder now contains one .Rds file per year with the name format "YYYY-MM.Rds
 ```{r}
 #create list of files & remove source data and code files
 files<-list.files()
-files[files != "DataPreparation.nb.html"];
-files[files != "DataPreparation.Rmd"];
-files[files != "ukpostcodes.csv"];
-files[files != "outputfile.csv"];
+
+files<-files[files != "DataPreparation.Rmd"];
+files<-files[files != "houseforwes.R"];
+files<-files[files != "ukpostcodes.csv"];
+files<-files[files != "outputfile.csv"];
+files<-files[files != "UKHousePrices.Rproj"];
+files<-files[files != "pp-complete.csv"];
 
 #Fuction to read the files, convert to .Rds and delete .csv
 Convert<-function(file){
   name<-substr(file, 1, 7)
   Readfile<-read.csv(file)
-  saveRDS(Readfile, file=paste(file,".Rds"))
-  file.remove(file)
+  saveRDS(Readfile, file=paste(name,".Rds", sep=""))
+  file.remove(file);
 }
 
 #Use lapply to loop over the files with our new function
-lapply(Convert, files)
-
-
+lapply(files, Convert)
 ```
 
 
