@@ -5,25 +5,14 @@ library(leaflet)
 
 
 ui <- dashboardPage(
-  
   dashboardHeader(title = "Wesley and the houses"),
-  
   dashboardSidebar(
-    
     sidebarMenu(
-      
       menuItem(
-        
         "Maps", 
-        
         tabName = "maps", 
-        
         icon = icon("globe"),
-        
         menuSubItem("Sold Prices", tabName = "sold", icon = icon("map"))
-        
-        #  menuSubItem("Population", tabName = "m_pop", icon = icon("map"))
-        
       )
       
     )
@@ -49,45 +38,25 @@ ui <- dashboardPage(
                     value=as.Date("2016-12-01"),timeFormat="%Y-%m-%d"),
         
         fluidRow(
-          
           column(3,
-                 
                  radioButtons("Type", "Property Type", c("Detatched"="D", 
-                                                         
                                                          "Semidetatched" = "S",
-                                                         
                                                          "Terraced" = "T",
-                                                         
                                                          "Flats/Maisonettes" = "F",
-                                                         
                                                          "Other" = "O",
-                                                         
                                                          "All (will be slow)" = "A"))),
-          
           column(3,
-                 
                  radioButtons("OldNew", "Age of Property", c("Established" = "Y",
-                                                             
                                                              "New Build" = "N",
-                                                             
                                                              "Any" = "A"))),
-          
           column(3,
-                 
                  radioButtons("Duration", "Ownership Duration", c("Freehold" = "F",
-                                                                  
                                                                   "Leasehold" = "L",
-                                                                  
                                                                   "Any" = "A")))),
-        
-        
-        
-        
-        
-        
-        
-        
-        
+        # column(3,
+        # radioButtons("SalesType", "Sales Type", c("Private Recidency" = "A",
+        #                                                  "Non-Private (e.g. Buy to let)" = "B",
+        #                                                  "Any" = "A")))),
         box(
           
           title = "sold prices",
@@ -102,15 +71,14 @@ ui <- dashboardPage(
           
         )
         
-      )
       
-    )))
+      
+    ))))
 
 
 
 server <- function(input, output) {
-  
-  
+
   
   output$map<-renderLeaflet({
     
@@ -251,13 +219,11 @@ server <- function(input, output) {
       clearControls() %>% 
       
       addLegend( pal=mypalette, values=~price, opacity=0.9, title = "prices", position = "bottomright" )
-    
-    
-    
-  })
+        })
   
-  
-  
+
+    
+
 }
 
 
