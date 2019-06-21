@@ -39,8 +39,13 @@ ui <- dashboardPage(
         radioButtons("Duration", "Ownership Duration", c("Freehold" = "F",
                                                     "Leasehold" = "L",
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
+                                                    "Any" = "A")))),
+=======
+>>>>>>> aa0a9797d938d8ee43a6fd911306bd544abedd91
+=======
                                                     "Any" = "A")))),
 =======
 >>>>>>> aa0a9797d938d8ee43a6fd911306bd544abedd91
@@ -50,6 +55,10 @@ ui <- dashboardPage(
                                                          "Non-Private (e.g. Buy to let)" = "B",
                                                          "Any" = "A")))),
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> master
+>>>>>>> aa0a9797d938d8ee43a6fd911306bd544abedd91
 =======
 >>>>>>> master
 >>>>>>> aa0a9797d938d8ee43a6fd911306bd544abedd91
@@ -69,8 +78,11 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+>>>>>>> aa0a9797d938d8ee43a6fd911306bd544abedd91
   
   output$map<-renderLeaflet({
     leaflet(options = leafletOptions(preferCanvas = TRUE)) %>%
@@ -146,6 +158,9 @@ server <- function(input, output) {
         })
     
 =======
+<<<<<<< HEAD
+>>>>>>> aa0a9797d938d8ee43a6fd911306bd544abedd91
+=======
 >>>>>>> aa0a9797d938d8ee43a6fd911306bd544abedd91
   output$map <- renderLeaflet({
     
@@ -184,6 +199,10 @@ server <- function(input, output) {
     
   })
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> master
+>>>>>>> aa0a9797d938d8ee43a6fd911306bd544abedd91
 =======
 >>>>>>> master
 >>>>>>> aa0a9797d938d8ee43a6fd911306bd544abedd91
