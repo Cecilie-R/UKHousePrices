@@ -90,7 +90,7 @@ The folder now contains one .Rds file per year with the name format "YYYY-MM.Rds
 files<-list.files()
 
 files<-files[files != "DataPreparation.Rmd"];
-files<-files[files != "houseforwes.R"];
+files<-files[files != "WesWantsHouse.R"];
 files<-files[files != "ukpostcodes.csv"];
 files<-files[files != "outputfile.csv"];
 files<-files[files != "UKHousePrices.Rproj"];
