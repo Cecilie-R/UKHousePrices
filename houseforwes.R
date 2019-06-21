@@ -78,15 +78,7 @@ ui <- dashboardPage(
                                                                   
                                                                   "Leasehold" = "L",
                                                                   
-                                                                  "Any" = "A"))),
-          
-          column(3,
-                 
-                 radioButtons("SalesType", "Sales Type", c("Private Recidency" = "A",
-                                                           
-                                                           "Non-Private (e.g. Buy to let)" = "B",
-                                                           
-                                                           "Any" = "A")))),
+                                                                  "Any" = "A")))),
         
         
         
@@ -150,7 +142,7 @@ server <- function(input, output) {
     
     
     
-   datamap1<- readRDS(paste(Dates, ".Rds", sep=""))
+    datamap1<-readRDS(paste(Dates, ".Rds", sep=""))
     
     
     
@@ -217,6 +209,7 @@ server <- function(input, output) {
     
     
     datamap1$price<-datamap1$price/1000
+    
     datamap1
     
   })
@@ -229,7 +222,7 @@ server <- function(input, output) {
     
     mybins=seq(min(datamap1()$price), max(datamap1()$price), by=10000)
     
-    mybins<-c(0,150,300,450,600,750,900,1050,1200)
+    mybins<-c(0,150,300,450,600,750,900,1050,Inf)
     
     mypalette = colorBin( palette="YlOrRd", domain=datamap1()$price, na.color="transparent", bins=mybins)
     
@@ -245,17 +238,21 @@ server <- function(input, output) {
     
     leafletProxy("map", data = datamap1()) %>%
       
+      clearShapes() %>%
+      
       addCircles(~long, ~lat, 
                  
-                 color = ~mypalette(price), radius=13, fillOpacity = 0.2, stroke=T,
+                 color = ~mypalette(price), radius=5, fillOpacity = 0.2, stroke=T,
                  
                  label = mytext,
                  
-                 labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"), textsize = "13px", direction = "auto")
-                 
-      ) %>%
+                 labelOptions = labelOptions( style = list("font-weight" = "normal", padding = "3px 8px"), textsize = "13px", direction = "auto")) %>%
       
-      addLegend( pal=mypalette, values=~price, opacity=0.9, title = "Magnitude", position = "bottomright" )
+      clearControls() %>% 
+      
+      addLegend( pal=mypalette, values=~price, opacity=0.9, title = "prices", position = "bottomright" )
+    
+    
     
   })
   
