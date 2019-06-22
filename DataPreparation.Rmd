@@ -19,6 +19,8 @@ big_mac_full_index <- read_csv("~/HouseProject/big-mac-data/output-data/big-mac-
     col_types = cols(date = col_datetime(format = "%Y-%m-%d")))
 
 bigmacUK<-subset(big_mac_full_index, iso_a3=="GBR")
+saveRDS(bigmacUK, file = "bigmac.Rds")
+rm(big_mac_full_index)
 ```
 
 ## Format
@@ -95,6 +97,8 @@ files<-files[files != "ukpostcodes.csv"];
 files<-files[files != "outputfile.csv"];
 files<-files[files != "UKHousePrices.Rproj"];
 files<-files[files != "pp-complete.csv"];
+files<-files[files != "bigmac.Rds"];
+
 
 #Fuction to read the files, convert to .Rds and delete .csv
 Convert<-function(file){
@@ -109,4 +113,33 @@ lapply(files, Convert)
 ```
 
 
+## Calculations
+The following code creates a function that loops through the monthly created .RDS files and calculates averages for all cominations of conditions that the user will be able to select. Each table of averages is saved in a new RDS .file
+```{r}
+files<-list.files()
+
+files<-files[files != "DataPreparation.Rmd"];
+files<-files[files != "WesWantsHouse.R"];
+files<-files[files != "ukpostcodes.csv"];
+files<-files[files != "outputfile.csv"];
+files<-files[files != "UKHousePrices.Rproj"];
+files<-files[files != "pp-complete.csv"];
+files<-files[files != "bigmac.Rds"];
+
+CalcAverages<-function(file){
+month<-readRDS(file)
+name<-substr(file, 1, 7)
+month<-month[,c("price","type","newbuild","duration")]
+aggData<-aggregate(price~., data=month, mean)
+median<-aggregate(price~., data=month, median)
+number<-aggregate(price~., data=month, length)
+aggData$median<-median$price
+aggData$number<-number$price
+names(aggData)<-c("type", "newbuild", "duration", "average", "median", "number")  
+  saveRDS(aggData, file=paste("avg", name,".Rds", sep=""))
+}
+
+lapply(files, CalcAverages)
+
+```
 
