@@ -46,6 +46,7 @@ postcodes$postcode<-as.character(postcodes$postcode)
 
 #create function
 prepare<-function(year){
+  
 
 #define the sql query to filter for year
 sql<-paste("select * from file where date like '%", year, "%'", sep="")
@@ -114,10 +115,10 @@ lapply(files, Convert)
 
 
 ## Calculations
-The following code creates a function that loops through the monthly created .RDS files and calculates averages for all cominations of conditions that the user will be able to select. Each table of averages is saved in a new RDS .file
+The following code creates a function that loops through the monthly created .RDS files and calculates averages, median and total number of transactions for all cominations of conditions that the user will be able to select. Each table of averages is saved in a new RDS .file
 ```{r}
 files<-list.files()
-
+filescopy<-files
 files<-files[files != "DataPreparation.Rmd"];
 files<-files[files != "WesWantsHouse.R"];
 files<-files[files != "ukpostcodes.csv"];
@@ -125,6 +126,7 @@ files<-files[files != "outputfile.csv"];
 files<-files[files != "UKHousePrices.Rproj"];
 files<-files[files != "pp-complete.csv"];
 files<-files[files != "bigmac.Rds"];
+
 
 CalcAverages<-function(file){
 month<-readRDS(file)
@@ -135,11 +137,33 @@ median<-aggregate(price~., data=month, median)
 number<-aggregate(price~., data=month, length)
 aggData$median<-median$price
 aggData$number<-number$price
-names(aggData)<-c("type", "newbuild", "duration", "average", "median", "number")  
+aggData$date<-file
+names(aggData)<-c("type", "newbuild", "duration", "average", "median", "number", "date")  
   saveRDS(aggData, file=paste("avg", name,".Rds", sep=""))
 }
 
 lapply(files, CalcAverages)
+
+newfiles<-list.files()
+newfiles<-newfiles[newfiles != filescopy];
+newfiles<-newfiles[newfiles != "DataPreparation.Rmd"];
+newfiles<-newfiles[newfiles != "WesWantsHouse.R"];
+newfiles<-newfiles[newfiles != "ukpostcodes.csv"];
+newfiles<-newfiles[newfiles != "outputfile.csv"];
+newfiles<-newfiles[newfiles != "UKHousePrices.Rproj"];
+newfiles<-newfiles[newfiles != "pp-complete.csv"];
+newfiles<-newfiles[newfiles != "bigmac.Rds"];
+
+merged <- data.frame()
+for (i in newfiles){
+df <- readRDS(i)
+merged <- rbind(merged, df)
+}
+names(merged)<-c("type", "newbuild", "duration", "average", "median",   "number", "date")
+merged$date<-gsub( ".Rds", "", as.character(merged$date))
+saveRDS(merged, file="AggregatedCalcData.Rds")
+file.remove(newfiles)
+
 
 ```
 
