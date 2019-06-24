@@ -1,65 +1,87 @@
 library(shinydashboard)
 library(leaflet)
+library(leaflet.extras)
+library(zoo)
+library(shinyWidgets)
 
+months<-readRDS("months.Rds")
 ui <- dashboardPage(
-  dashboardHeader(title = "Wesley and the houses"),
+  dashboardHeader(title = "Wesley and the Housing Market", titleWidth = "50%"),
   dashboardSidebar(sidebarMenu(
     menuItem(
-      "Maps",
-      tabName = "maps",
-      icon = icon("globe"),
-      menuSubItem("Sold Prices", tabName = "sold", icon = icon("map"))
+      "Map",
+      tabName = "map",
+      icon = icon("globe")
+    ),
+    menuItem(
+      "Plots",
+      tabName = "plots",
+      icon = icon("globe")
+    ),
+    radioButtons(
+      "Type",
+      "Property Type",
+      c(
+        "Detatched" = "D",
+        "Semidetatched" = "S",
+        "Terraced" = "T",
+        "Flats/Maisonettes" = "F",
+        "Other" = "O"#,
+       # "All (will be slow)" = "A"
+      )
+    ),
+    radioButtons(
+      "OldNew",
+      "Age of Property",
+      c(
+        "Established" = "Y",
+        "New Build" = "N"#,
+       # "Any" = "A"
+      )
+    ),
+    radioButtons(
+      "Duration",
+      "Ownership Duration",
+      c(
+        "Freehold" = "F",
+        "Leasehold" = "L"#,
+       # "Any" = "A"
+      )
     )
   )),
   
   dashboardBody(tabItems(
     tabItem(
-      tabName = "sold",
-      sliderInput(
-        "Dates",
-        "Dates:",
-        min = as.Date("1995-01-01", "%Y-%m-%d"),
-        max = as.Date("2019-04-01", "%Y-%m-%d"),
-        value = as.Date("2016-12-01"),
-        timeFormat = "%Y-%m-%d"
+      tabName = "plots",
+      sliderInput("range", "Age:",min = 0, max = 100, value = c(0,100)),
+      radioButtons(
+        "Calc",
+        "Select what to plot:",
+        c(
+          "mean" = "mean",
+          "median" = "median",
+          "number" = "number"
+        )
       ),
+      plotOutput("scatterPlot", height = 300)
+    ),
+   
+     tabItem(
+      tabName = "map",
       
-      fluidRow(
-        column(3,
-               radioButtons(
-                 "Type",
-                 "Property Type",
-                 c(
-                   "Detatched" = "D",
-                   "Semidetatched" = "S",
-                   "Terraced" = "T",
-                   "Flats/Maisonettes" = "F",
-                   "Other" = "O",
-                   "All (will be slow)" = "A"
-                 )
-               )),
-        column(3,
-               radioButtons(
-                 "OldNew",
-                 "Age of Property",
-                 c(
-                   "Established" = "Y",
-                   "New Build" = "N",
-                   "Any" = "A"
-                 )
-               )),
-        column(3,
-               radioButtons(
-                 "Duration",
-                 "Ownership Duration",
-                 c(
-                   "Freehold" = "F",
-                   "Leasehold" = "L",
-                   "Any" = "A"
-                 )
-               ))
+      
+      sliderTextInput(
+        inputId = "test", label = "Month", width = "100%",
+        choices = months, 
+        selected = months[4]
       ),
+
+     
+    
       
+      
+      
+
       box(
         title = "sold prices",
         collapsible = TRUE,
@@ -81,11 +103,13 @@ server <- function(input, output) {
       
       setView(lat = 52.1386394,
               lng = -0.4667782 ,
-              zoom = 8)
+              zoom = 8) %>%
+      addSearchOSM()
+    
   })
 
   datamap1 <- reactive({
-    Dates <- format(input$Dates, "%Y-%m")
+    Dates <- input$test
     datamap1 <- readRDS(paste(Dates, ".Rds", sep = ""))
     
     if (input$Type == "T") {
@@ -126,7 +150,26 @@ server <- function(input, output) {
     datamap1
   })
   
+  Agg<-reactive({
+    agg<-readRDS("AggregatedCalcData.Rds")
+    agg<-subset(agg, type == input$Type)
+    agg<-subset(agg, newbuild == input$OldNew)
+    agg<-subset(agg, duration == input$Duration)
+    agg
+  })
   
+  
+  output$scatterPlot <- renderPlot({
+    if (input$Calc=="mean"){
+    y <- Agg()$average
+    } else if (input$Calc=="median"){
+      y <-Agg()$median
+    } else if (input$Calc=="number"){
+      y<-Agg()$number
+    }
+    x <- as.POSIXct(paste0(as.character(Agg()[,"date"]),"-01"), format = "%Y-%m-%d")
+    plot(x, y)
+  })
   
   observe({
     # Create a color palette with handmade bins.
