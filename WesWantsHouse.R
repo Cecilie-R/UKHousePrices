@@ -1,8 +1,8 @@
 library(shinydashboard)
 library(leaflet)
 library(leaflet.extras)
-library(zoo)
 library(shinyWidgets)
+library(zoo)
 
 months<-readRDS("months.Rds")
 ui <- dashboardPage(
@@ -53,7 +53,11 @@ ui <- dashboardPage(
   dashboardBody(tabItems(
     tabItem(
       tabName = "plots",
-      sliderInput("range", "Age:",min = 0, max = 100, value = c(0,100)),
+      sliderTextInput(
+        inputId = "range", label = "Month", width = "100%",
+        choices = months, 
+        selected = months[c(4,50)]
+      ),
       radioButtons(
         "Calc",
         "Select what to plot:",
@@ -160,14 +164,20 @@ server <- function(input, output) {
   
   
   output$scatterPlot <- renderPlot({
+    data<-Agg()
+    data$date<-as.yearmon(data$date)
+    data<-subset(data, date > input$range[1] & date < input$range[2])
     if (input$Calc=="mean"){
-    y <- Agg()$average
+    y <- data$average
     } else if (input$Calc=="median"){
-      y <-Agg()$median
+      y <-data$median
     } else if (input$Calc=="number"){
-      y<-Agg()$number
+      y<-data$number
     }
-    x <- as.POSIXct(paste0(as.character(Agg()[,"date"]),"-01"), format = "%Y-%m-%d")
+    
+    x <- data$date
+    
+   # x <- as.POSIXct(paste0(as.character(Agg()[,"date"]),"-01"), format = "%Y-%m-%d")
     plot(x, y)
   })
   
