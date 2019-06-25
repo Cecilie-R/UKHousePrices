@@ -3,6 +3,7 @@ library(leaflet)
 library(leaflet.extras)
 library(shinyWidgets)
 library(zoo)
+library(knitr)
 
 months<-readRDS("months.Rds")
 ui <- dashboardPage(
@@ -17,6 +18,16 @@ ui <- dashboardPage(
       "Plots",
       tabName = "plots",
       icon = icon("globe")
+    ),
+    menuItem(
+      "about",
+      tabName = "source code for app",
+      icon = icon("globe"),
+      menuSubItem("Data preparation", tabName = "data", icon = icon("dashboard")),
+      menuSubItem("ui", "user interface file", icon = icon("dashboard")),
+      menuSubItem("server", "server file", icon = icon("dashboard"))
+      
+      
     ),
     radioButtons(
       "Type",
@@ -51,6 +62,17 @@ ui <- dashboardPage(
   )),
   
   dashboardBody(tabItems(
+ tabItem(
+      tabName = "data",
+      uiOutput('markdown')
+      
+      
+      
+      
+   ),
+   # tags$iframe(src = 'DataPreparation.nb.html', # put testdoc.html to /www
+    #            width = '100%', height = '800px', 
+     #           frameborder = 0, scrolling = 'auto')),
     tabItem(
       tabName = "plots",
       sliderTextInput(
@@ -100,6 +122,14 @@ ui <- dashboardPage(
 
 
 server <- function(input, output) {
+  
+  output$markdown <- renderUI({
+    HTML(markdown::markdownToHTML(knit('DataPreparation.rmd', quiet = TRUE)))
+  })
+  
+
+    
+  
   output$map <- renderLeaflet({
     leaflet(options = leafletOptions(preferCanvas = TRUE)) %>%
       
